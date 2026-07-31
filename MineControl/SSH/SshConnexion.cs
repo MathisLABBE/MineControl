@@ -68,10 +68,13 @@ namespace MineControl.SSH
             SshCommand lCommande = Client.CreateCommand(pCommande);
             lCommande.CommandTimeout = TimeSpan.FromSeconds(10);
 
+            // Execute la commande
+            string lSortie = lCommande.Execute();
+
             Retour_SshCommande lRetour = new()
             {
+                Sortie = lSortie,
                 CodeRetour = lCommande.ExitStatus,
-                Sortie = lCommande.Execute(),
                 Erreur = lCommande.Error ?? ""
             };
 
