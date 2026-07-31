@@ -1,20 +1,19 @@
-﻿namespace MineControl
+﻿using MineControl.SSH;
+
+namespace MineControl
 {
     public sealed class Moteur
     {
         #region [Singleton]
 
-        private static readonly Moteur instance = new();
+        public static Moteur Instance { get; } = new();
 
-        public static Moteur Instance
-        {
-            get { return instance; }
-        }
+        #endregion
 
-        public static void Demarrer()
-        {
-            Console.WriteLine("Le moteur démarre.");
-        }
+
+        #region [Propriétés]
+
+        public SshConnexion? ConnexionSsh { get; set; }
 
         #endregion
 
@@ -22,6 +21,17 @@
         #region [Constructeur]
 
         private Moteur() { }
+
+        #endregion
+
+
+        #region [Deconnecter]
+
+        public void DeconnecterSsh()
+        {
+            ConnexionSsh?.Deconnecter();
+            ConnexionSsh = null;
+        }
 
         #endregion
     }
