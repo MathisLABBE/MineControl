@@ -1,11 +1,10 @@
-﻿using MineControl.Helpers;
-using Renci.SshNet;
+﻿using Renci.SshNet;
 using Renci.SshNet.Common;
 using System.IO;
 
 namespace MineControl.SSH
 {
-    public class SshConnexion
+    public class SshConnexion : ISshConnexion
     {
         #region [Propriétés]
 
@@ -13,6 +12,7 @@ namespace MineControl.SSH
         public string NomUtilisateur { get; set; } = "";
         public int Port { get; set; } = 22;
         public string EmpreinteHoteSha256 { get; set; } = "";
+        public string CheminCle { get; set; } = "";
 
         private SshClient? Client = null;
         public bool EstConnecte => Client?.IsConnected == true;
@@ -61,11 +61,11 @@ namespace MineControl.SSH
 
             if (string.IsNullOrWhiteSpace(pPassphrase))
             {
-                lClePrivee = new(AppHelper.SshCheminCle);
+                lClePrivee = new(CheminCle);
             }
             else
             {
-                lClePrivee = new(AppHelper.SshCheminCle, pPassphrase);
+                lClePrivee = new(CheminCle, pPassphrase);
             }
 
             PrivateKeyAuthenticationMethod lAuthentification = new(NomUtilisateur, lClePrivee);
@@ -75,17 +75,18 @@ namespace MineControl.SSH
                 Timeout = TimeSpan.FromSeconds(10)
             };
 
-            string lEmpreinteAttendue = NormaliserEmpreinteSha256(EmpreinteHoteSha256);
-
             SshClient lClient = new(lInfoConnexion)
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(30)
             };
 
+            string lEmpreinteAttendue = NormaliserEmpreinteSha256(EmpreinteHoteSha256);
+
             lClient.HostKeyReceived += (_, e) =>
             {
-                string lEmpreinteRecue = NormaliserEmpreinteSha256(EmpreinteHoteSha256);
-                e.CanTrust = string.Equals(lEmpreinteRecue, e.FingerPrintSHA256, StringComparison.OrdinalIgnoreCase);
+                string lEmpreinteRecue = NormaliserEmpreinteSha256(e.FingerPrintSHA256);
+
+                e.CanTrust = string.Equals(lEmpreinteAttendue, lEmpreinteRecue, StringComparison.OrdinalIgnoreCase);
             };
 
             return lClient;
@@ -146,17 +147,17 @@ namespace MineControl.SSH
                     "Port SSH : le port doit être compris entre 1 et 65535.");
             }
 
-            if (string.IsNullOrWhiteSpace(AppHelper.SshCheminCle))
+            if (string.IsNullOrWhiteSpace(CheminCle))
             {
                 throw new ArgumentException(
                     "Clé privée : le chemin de la clé ne peut pas être vide.");
             }
 
-            if (!File.Exists(AppHelper.SshCheminCle))
+            if (!File.Exists(CheminCle))
             {
                 throw new FileNotFoundException(
                     "Clé privée : le fichier de clé SSH est introuvable.",
-                    AppHelper.SshCheminCle);
+                    CheminCle);
             }
 
             if (string.IsNullOrWhiteSpace(EmpreinteHoteSha256))

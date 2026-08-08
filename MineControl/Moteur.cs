@@ -1,4 +1,5 @@
-﻿using MineControl.SSH;
+﻿using MineControl.Services;
+using MineControl.SSH;
 
 namespace MineControl
 {
@@ -14,6 +15,8 @@ namespace MineControl
         #region [Propriétés]
 
         public SshConnexion? ConnexionSsh { get; set; }
+
+        public MinecraftService? ServiceMinecraft { get; set; }
 
         #endregion
 

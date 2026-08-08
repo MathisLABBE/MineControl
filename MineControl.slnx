@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="MineControl.Tests/MineControl.Tests.csproj" Id="198fd1e4-0910-491b-a2ee-ab4b838c0d14" />
   <Project Path="MineControl/MineControl.csproj" />
 </Solution>
